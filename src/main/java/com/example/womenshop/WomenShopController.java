@@ -17,9 +17,26 @@ public class WomenShopController implements Initializable {
     @FXML private ListView<Product> lvProducts;
     @FXML private TextField txtName, txtPrice, txtStock;
     @FXML private ComboBox<String> cmbCategory;
-    @FXML private Button btnAdd, btnSave, btnDelete;
+    @FXML private Button btnSave, btnDelete, btnFilter, btnReset;
 
     private DBManager manager;
+
+    private void displayProductDetails(Product p) {
+        if (p != null) {
+            txtName.setText(p.getName());
+            cmbCategory.setValue(p.getCategory());
+            txtPrice.setText(String.valueOf(p.getPrice()));
+            txtStock.setText(String.valueOf(p.getStock()));
+        }
+    }
+
+    private void fetchProducts() {
+        List<Product> products = manager.loadProducts();
+        if (products != null) {
+            lvProducts.setItems(FXCollections.observableArrayList(products));
+        }
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -35,29 +52,31 @@ public class WomenShopController implements Initializable {
         );
     }
 
-    private void fetchProducts() {
-        List<Product> products = manager.loadProducts();
-        if (products != null) {
-            lvProducts.setItems(FXCollections.observableArrayList(products));
-        }
-    }
-
-    private void displayProductDetails(Product p) {
-        if (p != null) {
-            txtName.setText(p.getName());
-            cmbCategory.setValue(p.getCategory());
-            txtPrice.setText(String.valueOf(p.getPrice()));
-            txtStock.setText(String.valueOf(p.getStock()));
+    @FXML
+    private void onDelete() {
+        Product selected = lvProducts.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            manager.deleteProduct(selected.getId());
+            fetchProducts();
         }
     }
 
     @FXML
-    private void onNew() {
-        lvProducts.getSelectionModel().clearSelection();
-        txtName.clear();
-        cmbCategory.setValue(null);
-        txtPrice.clear();
-        txtStock.clear();
+    private void onFilter() {
+        Product selected = lvProducts.getSelectionModel().getSelectedItem();
+        String category = cmbCategory.getValue();
+
+        if (selected == null && category != null) {
+
+            List<Product> products = manager.loadProducts();
+            if (products != null) {
+                List<Product> filtered = products.stream()
+                        .filter(p -> category.equals(p.getCategory()))
+                        .toList();
+
+                lvProducts.setItems(FXCollections.observableArrayList(filtered));
+            }
+        }
     }
 
     @FXML
@@ -82,11 +101,13 @@ public class WomenShopController implements Initializable {
     }
 
     @FXML
-    private void onDelete() {
-        Product selected = lvProducts.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            manager.deleteProduct(selected.getId());
-            fetchProducts();
-        }
+    private void onReset() {
+        lvProducts.getSelectionModel().clearSelection();
+        txtName.clear();
+        cmbCategory.setValue(null);
+        txtPrice.clear();
+        txtStock.clear();
+
+        fetchProducts();
     }
 }
