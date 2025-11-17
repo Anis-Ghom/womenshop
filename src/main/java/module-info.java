@@ -13,7 +13,15 @@ module com.example.womenshop {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.sql;
+    requires mysql.connector.j;
+    requires com.example.womenshop;
 
     opens com.example.womenshop to javafx.fxml;
     exports com.example.womenshop;
+    exports com.example.womenshop.controller;
+    opens com.example.womenshop.controller to javafx.fxml;
+    exports com.example.womenshop.repository.mysql;
+    opens com.example.womenshop.repository.mysql to javafx.fxml;
+    exports com.example.womenshop.repository;
+    opens com.example.womenshop.repository to javafx.fxml;
 }
